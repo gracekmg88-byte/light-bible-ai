@@ -1,6 +1,6 @@
-import { Link, useLocation, type ReactNode } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Book, Home, Sparkles, Star, User } from "lucide-react";
-import type { ReactNode as RN } from "react";
+import type { ReactNode } from "react";
 
 const NAV = [
   { to: "/", label: "Accueil", icon: Home },
@@ -10,7 +10,7 @@ const NAV = [
   { to: "/profil", label: "Profil", icon: User },
 ] as const;
 
-export function MobileShell({ children }: { children: RN }) {
+export function MobileShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col">
