@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          book_id: number
+          book_name: string
+          chapter: number
+          created_at: string
+          id: string
+          text: string
+          user_id: string
+          verse: number
+        }
+        Insert: {
+          book_id: number
+          book_name: string
+          chapter: number
+          created_at?: string
+          id?: string
+          text: string
+          user_id: string
+          verse: number
+        }
+        Update: {
+          book_id?: number
+          book_name?: string
+          chapter?: number
+          created_at?: string
+          id?: string
+          text?: string
+          user_id?: string
+          verse?: number
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          book_id: number
+          book_name: string
+          chapter: number
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          verse: number
+        }
+        Insert: {
+          book_id: number
+          book_name: string
+          chapter: number
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          verse: number
+        }
+        Update: {
+          book_id?: number
+          book_name?: string
+          chapter?: number
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          verse?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
