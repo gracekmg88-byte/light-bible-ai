@@ -107,6 +107,69 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_sessions: {
+        Row: {
+          book_id: number
+          book_name: string
+          chapter: number
+          completion_percent: number
+          created_at: string
+          duration_seconds: number
+          id: string
+          plan_day: number | null
+          plan_id: string | null
+          user_id: string
+        }
+        Insert: {
+          book_id: number
+          book_name: string
+          chapter: number
+          completion_percent?: number
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          plan_day?: number | null
+          plan_id?: string | null
+          user_id: string
+        }
+        Update: {
+          book_id?: number
+          book_name?: string
+          chapter?: number
+          completion_percent?: number
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          plan_day?: number | null
+          plan_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          active_plan_id: string | null
+          reminder_enabled: boolean
+          reminder_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_plan_id?: string | null
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_plan_id?: string | null
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

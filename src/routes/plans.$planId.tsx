@@ -5,6 +5,7 @@ import { getPlan } from "@/lib/reading-plans";
 import { getBook } from "@/lib/bible-books";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getSettings, upsertSettings } from "@/lib/user-settings";
 import { Progress } from "@/components/ui/progress";
 import { Bell, BellOff, Check, BookOpen } from "lucide-react";
 import { toast } from "sonner";
@@ -19,9 +20,8 @@ function PlanDetail() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [done, setDone] = useState<Set<number>>(new Set());
-  const [reminder, setReminder] = useState<string | null>(
-    typeof window !== "undefined" ? localStorage.getItem(`reminder:${planId}`) : null
-  );
+  const [reminderTime, setReminderTime] = useState<string>("08:00");
+  const [reminderOn, setReminderOn] = useState<boolean>(false);
 
   useEffect(() => {
     if (!user || !plan) return;
@@ -31,6 +31,12 @@ function PlanDetail() {
       .eq("user_id", user.id)
       .eq("plan_id", plan.id)
       .then(({ data }) => setDone(new Set((data ?? []).map((d) => d.day))));
+    getSettings(user.id).then((s) => {
+      if (s) {
+        setReminderTime(s.reminder_time);
+        setReminderOn(s.reminder_enabled && s.active_plan_id === plan.id);
+      }
+    });
   }, [user, plan]);
 
   if (!plan) return <MobileShell><div className="p-8 text-center">Plan introuvable</div></MobileShell>;
@@ -53,20 +59,21 @@ function PlanDetail() {
     }
   };
 
-  const enableReminder = async () => {
-    if (!("Notification" in window)) { toast.error("Notifications indisponibles"); return; }
-    const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
-    if (perm !== "granted") { toast.error("Permission refusée"); return; }
-    const time = "08:00";
-    localStorage.setItem(`reminder:${planId}`, time);
-    setReminder(time);
-    toast.success(`Rappel quotidien activé à ${time}`);
-  };
-
-  const disableReminder = () => {
-    localStorage.removeItem(`reminder:${planId}`);
-    setReminder(null);
-    toast.info("Rappel désactivé");
+  const saveReminder = async (enabled: boolean, time: string) => {
+    if (!user) { toast.info("Connecte-toi pour activer les rappels"); navigate({ to: "/auth" }); return; }
+    if (enabled && "Notification" in window) {
+      const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+      if (perm !== "granted") { toast.error("Permission refusée"); return; }
+    }
+    await upsertSettings(user.id, {
+      reminder_time: time,
+      reminder_enabled: enabled,
+      active_plan_id: enabled ? plan.id : null,
+    });
+    if (enabled) localStorage.setItem("bl:active_plan", plan.id);
+    setReminderOn(enabled);
+    setReminderTime(time);
+    toast.success(enabled ? `Rappel à ${time}` : "Rappel désactivé");
   };
 
   return (
@@ -74,17 +81,27 @@ function PlanDetail() {
       <PageHeader title={plan.title} subtitle={`${plan.subtitle} · ${plan.days} jours`} />
       <div className="px-5 pt-6">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] uppercase tracking-widest text-gold">Progression</p>
               <p className="mt-1 font-display text-2xl">{done.size}<span className="text-muted-foreground">/{plan.days}</span></p>
             </div>
-            <button
-              onClick={reminder ? disableReminder : enableReminder}
-              className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs hover:border-gold/50"
-            >
-              {reminder ? <><BellOff className="h-3.5 w-3.5" /> {reminder}</> : <><Bell className="h-3.5 w-3.5" /> Rappel</>}
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="rounded-xl border border-border bg-background px-2 py-1.5 text-xs"
+              />
+              <button
+                onClick={() => saveReminder(!reminderOn, reminderTime)}
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-1.5 text-xs hover:border-gold/50"
+              >
+                {reminderOn
+                  ? <><BellOff className="h-3.5 w-3.5" /> Désactiver</>
+                  : <><Bell className="h-3.5 w-3.5" /> Activer le rappel</>}
+              </button>
+            </div>
           </div>
           <Progress value={progress} className="mt-4" />
         </div>
@@ -120,6 +137,10 @@ function PlanDetail() {
                 <Link
                   to="/bible/$bookId/$chapter"
                   params={{ bookId: String(readings[0].bookId), chapter: String(readings[0].chapter) }}
+                  onClick={() => {
+                    localStorage.setItem("bl:active_plan", plan.id);
+                    readings.forEach((r) => localStorage.setItem(`bl:plan_day:${r.bookId}:${r.chapter}`, String(day)));
+                  }}
                   className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs hover:border-gold/50"
                 >
                   <BookOpen className="h-3.5 w-3.5" /> Lire

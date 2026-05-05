@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { fetchChapter, getBook, type Verse } from "@/lib/bible-books";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useReadingTracker } from "@/lib/reading-tracker";
 import { ChevronLeft, ChevronRight, Star, Volume2, MessageCircle, Type, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +25,15 @@ function ChapterPage() {
   const [explanation, setExplanation] = useState<string>("");
   const [explLoading, setExplLoading] = useState(false);
   const { user } = useAuth();
+  const articleRef = useRef<HTMLElement>(null);
+  useReadingTracker({
+    userId: user?.id ?? null,
+    bookId: book?.id ?? 0,
+    bookName: book?.name ?? "",
+    chapter: ch,
+    containerRef: articleRef,
+    ready: !loading && verses.length > 0,
+  });
 
   useEffect(() => {
     if (!book) return;
@@ -111,7 +121,7 @@ function ChapterPage() {
         {loading ? (
           <div className="space-y-3">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-5 animate-pulse rounded bg-muted" />)}</div>
         ) : (
-          <article className="space-y-3" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
+          <article ref={articleRef} className="space-y-3" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
             {verses.map((v) => (
               <p
                 key={v.pk}
