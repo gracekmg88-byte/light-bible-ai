@@ -6,7 +6,7 @@ type Args = {
   bookId: number;
   bookName: string;
   chapter: number;
-  containerRef: React.RefObject<HTMLElement>;
+  containerRef: React.RefObject<HTMLElement | null>;
   ready: boolean; // true when verses loaded
 };
 
