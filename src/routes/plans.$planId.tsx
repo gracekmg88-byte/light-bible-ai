@@ -137,6 +137,10 @@ function PlanDetail() {
                 <Link
                   to="/bible/$bookId/$chapter"
                   params={{ bookId: String(readings[0].bookId), chapter: String(readings[0].chapter) }}
+                  onClick={() => {
+                    localStorage.setItem("bl:active_plan", plan.id);
+                    readings.forEach((r) => localStorage.setItem(`bl:plan_day:${r.bookId}:${r.chapter}`, String(day)));
+                  }}
                   className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs hover:border-gold/50"
                 >
                   <BookOpen className="h-3.5 w-3.5" /> Lire
