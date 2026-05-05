@@ -59,20 +59,21 @@ function PlanDetail() {
     }
   };
 
-  const enableReminder = async () => {
-    if (!("Notification" in window)) { toast.error("Notifications indisponibles"); return; }
-    const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
-    if (perm !== "granted") { toast.error("Permission refusée"); return; }
-    const time = "08:00";
-    localStorage.setItem(`reminder:${planId}`, time);
-    setReminder(time);
-    toast.success(`Rappel quotidien activé à ${time}`);
-  };
-
-  const disableReminder = () => {
-    localStorage.removeItem(`reminder:${planId}`);
-    setReminder(null);
-    toast.info("Rappel désactivé");
+  const saveReminder = async (enabled: boolean, time: string) => {
+    if (!user) { toast.info("Connecte-toi pour activer les rappels"); navigate({ to: "/auth" }); return; }
+    if (enabled && "Notification" in window) {
+      const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+      if (perm !== "granted") { toast.error("Permission refusée"); return; }
+    }
+    await upsertSettings(user.id, {
+      reminder_time: time,
+      reminder_enabled: enabled,
+      active_plan_id: enabled ? plan.id : null,
+    });
+    if (enabled) localStorage.setItem("bl:active_plan", plan.id);
+    setReminderOn(enabled);
+    setReminderTime(time);
+    toast.success(enabled ? `Rappel à ${time}` : "Rappel désactivé");
   };
 
   return (
@@ -80,17 +81,27 @@ function PlanDetail() {
       <PageHeader title={plan.title} subtitle={`${plan.subtitle} · ${plan.days} jours`} />
       <div className="px-5 pt-6">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] uppercase tracking-widest text-gold">Progression</p>
               <p className="mt-1 font-display text-2xl">{done.size}<span className="text-muted-foreground">/{plan.days}</span></p>
             </div>
-            <button
-              onClick={reminder ? disableReminder : enableReminder}
-              className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs hover:border-gold/50"
-            >
-              {reminder ? <><BellOff className="h-3.5 w-3.5" /> {reminder}</> : <><Bell className="h-3.5 w-3.5" /> Rappel</>}
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="rounded-xl border border-border bg-background px-2 py-1.5 text-xs"
+              />
+              <button
+                onClick={() => saveReminder(!reminderOn, reminderTime)}
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-1.5 text-xs hover:border-gold/50"
+              >
+                {reminderOn
+                  ? <><BellOff className="h-3.5 w-3.5" /> Désactiver</>
+                  : <><Bell className="h-3.5 w-3.5" /> Activer le rappel</>}
+              </button>
+            </div>
           </div>
           <Progress value={progress} className="mt-4" />
         </div>
