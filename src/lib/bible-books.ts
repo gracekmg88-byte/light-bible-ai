@@ -82,7 +82,7 @@ export type Verse = { pk: number; verse: number; text: string };
 
 // Bolls.life public API. LSG = Louis Segond 1910 (domaine public).
 export async function fetchChapter(bookId: number, chapter: number): Promise<Verse[]> {
-  const res = await fetch(`https://bolls.life/get-text/LSG/${bookId}/${chapter}/`);
+  const res = await fetch(`https://bolls.life/get-text/FRLSG/${bookId}/${chapter}/`);
   if (!res.ok) throw new Error("Erreur de chargement du chapitre");
   const data = (await res.json()) as Array<{ pk: number; verse: number; text: string }>;
   // Strip simple HTML tags (Bolls renvoie parfois des balises)

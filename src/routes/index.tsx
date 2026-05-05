@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { fetchChapter, getBook, getDailyRef } from "@/lib/bible-books";
-import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun } from "lucide-react";
+import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -71,7 +71,7 @@ function Home() {
         <ActionCard to="/bible" icon={<BookIcon className="h-5 w-5" />} title="Lire la Bible" desc="Ancien & Nouveau Testament" />
         <ActionCard to="/assistant" icon={<Sparkles className="h-5 w-5" />} title="Assistant IA" desc="Pose une question" />
         <ActionCard to="/favoris" icon={<Star className="h-5 w-5" />} title="Mes favoris" desc="Versets sauvegardés" />
-        <ActionCard to="/profil" icon={<Sun className="h-5 w-5" />} title="Méditation" desc="Réflexion du jour" />
+        <ActionCard to="/plans" icon={<CalendarDays className="h-5 w-5" />} title="Plans de lecture" desc="7, 30 ou 90 jours" />
       </section>
     </MobileShell>
   );

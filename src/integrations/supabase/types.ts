@@ -83,6 +83,30 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_plans_progress: {
+        Row: {
+          completed_at: string
+          day: number
+          id: string
+          plan_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          day: number
+          id?: string
+          plan_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          day?: number
+          id?: string
+          plan_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
