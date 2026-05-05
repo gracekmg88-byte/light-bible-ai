@@ -5,6 +5,7 @@ import { getPlan } from "@/lib/reading-plans";
 import { getBook } from "@/lib/bible-books";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getSettings, upsertSettings } from "@/lib/user-settings";
 import { Progress } from "@/components/ui/progress";
 import { Bell, BellOff, Check, BookOpen } from "lucide-react";
 import { toast } from "sonner";
@@ -19,9 +20,8 @@ function PlanDetail() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [done, setDone] = useState<Set<number>>(new Set());
-  const [reminder, setReminder] = useState<string | null>(
-    typeof window !== "undefined" ? localStorage.getItem(`reminder:${planId}`) : null
-  );
+  const [reminderTime, setReminderTime] = useState<string>("08:00");
+  const [reminderOn, setReminderOn] = useState<boolean>(false);
 
   useEffect(() => {
     if (!user || !plan) return;
@@ -31,6 +31,12 @@ function PlanDetail() {
       .eq("user_id", user.id)
       .eq("plan_id", plan.id)
       .then(({ data }) => setDone(new Set((data ?? []).map((d) => d.day))));
+    getSettings(user.id).then((s) => {
+      if (s) {
+        setReminderTime(s.reminder_time);
+        setReminderOn(s.reminder_enabled && s.active_plan_id === plan.id);
+      }
+    });
   }, [user, plan]);
 
   if (!plan) return <MobileShell><div className="p-8 text-center">Plan introuvable</div></MobileShell>;
