@@ -1,6 +1,7 @@
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { ReminderScheduler } from "@/components/ReminderScheduler";
 
 function NotFoundComponent() {
   return (
@@ -41,6 +42,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head><HeadContent /></head>
       <body>
         {children}
+        <ReminderScheduler />
         <Toaster />
         <Scripts />
       </body>
