@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { fetchChapter, getBook, type Verse } from "@/lib/bible-books";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useReadingTracker } from "@/lib/reading-tracker";
 import { ChevronLeft, ChevronRight, Star, Volume2, MessageCircle, Type, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
