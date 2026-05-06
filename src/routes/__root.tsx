@@ -2,6 +2,8 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-r
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { ReminderScheduler } from "@/components/ReminderScheduler";
+import { GlobalAudioProvider } from "@/lib/audio-player";
+import { MiniPlayer } from "@/components/MiniPlayer";
 
 function NotFoundComponent() {
   return (
@@ -41,7 +43,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="fr">
       <head><HeadContent /></head>
       <body>
-        {children}
+        <GlobalAudioProvider>
+          {children}
+          <MiniPlayer />
+        </GlobalAudioProvider>
         <ReminderScheduler />
         <Toaster />
         <Scripts />
