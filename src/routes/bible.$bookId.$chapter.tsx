@@ -87,6 +87,25 @@ function ChapterPage() {
     window.speechSynthesis.speak(u);
   };
 
+  const [chapterPlaying, setChapterPlaying] = useState(false);
+  const playChapter = () => {
+    if (!("speechSynthesis" in window)) { toast.error("Audio indisponible"); return; }
+    if (chapterPlaying) {
+      window.speechSynthesis.cancel();
+      setChapterPlaying(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    setChapterPlaying(true);
+    verses.forEach((v, i) => {
+      const u = new SpeechSynthesisUtterance(v.text);
+      u.lang = "fr-FR";
+      u.rate = 0.95;
+      if (i === verses.length - 1) u.onend = () => setChapterPlaying(false);
+      window.speechSynthesis.speak(u);
+    });
+  };
+
   const openCommentary = async (v: Verse) => {
     setActive(v);
     setExplanation("");
