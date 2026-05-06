@@ -130,6 +130,9 @@ function ChapterPage() {
         subtitle={book.testament === "AT" ? "Ancien Testament" : "Nouveau Testament"}
         right={
           <div className="flex items-center gap-1">
+            <button onClick={playChapter} disabled={loading || verses.length === 0} className={`rounded-lg border p-2 ${chapterPlaying ? "border-gold/60 bg-gold/10 text-gold" : "border-border text-foreground"}`} aria-label="Écouter le chapitre">
+              <Volume2 className="h-4 w-4" />
+            </button>
             <button onClick={() => setFontSize((s) => Math.max(13, s - 1))} className="rounded-lg border border-border p-2 text-muted-foreground"><Type className="h-3.5 w-3.5" /></button>
             <button onClick={() => setFontSize((s) => Math.min(24, s + 1))} className="rounded-lg border border-border p-2 text-foreground"><Type className="h-4 w-4" /></button>
           </div>
