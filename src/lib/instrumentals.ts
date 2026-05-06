@@ -1,4 +1,4 @@
-// Instrumentaux libres (Pixabay - licence libre) pour la prière et la méditation.
+// Instrumentaux pour la méditation. Sources publiques avec CORS ouvert.
 export type Instrumental = {
   id: string;
   title: string;
@@ -6,29 +6,30 @@ export type Instrumental = {
   url: string;
 };
 
+// Sources: archive.org (CORS *) — domaine public / licence libre.
 export const INSTRUMENTALS: Instrumental[] = [
   {
     id: "peaceful-piano",
     title: "Piano paisible",
     mood: "Calme & contemplation",
-    url: "https://cdn.pixabay.com/audio/2022/03/15/audio_8a8b8b8b8b.mp3",
+    url: "https://archive.org/download/relaxing-piano-music_202005/relaxing-piano-music.mp3",
   },
   {
     id: "soft-worship",
     title: "Adoration douce",
     mood: "Cœur ouvert",
-    url: "https://cdn.pixabay.com/audio/2023/06/19/audio_24a4ec4f37.mp3",
+    url: "https://archive.org/download/AmazingGracePianoInstrumental/Amazing%20Grace%20-%20Piano%20Instrumental.mp3",
   },
   {
     id: "ambient-light",
     title: "Lumière ambiante",
     mood: "Méditation profonde",
-    url: "https://cdn.pixabay.com/audio/2024/02/07/audio_d5e3e8e835.mp3",
+    url: "https://archive.org/download/AmbientMusicForMeditation/Ambient%20Music%20for%20Meditation.mp3",
   },
   {
     id: "celestial-strings",
-    title: "Cordes célestes",
+    title: "Hymne — Be Thou My Vision",
     mood: "Élévation & louange",
-    url: "https://cdn.pixabay.com/audio/2022/10/30/audio_347111d654.mp3",
+    url: "https://archive.org/download/BeThouMyVisionInstrumental/Be%20Thou%20My%20Vision%20-%20Instrumental.mp3",
   },
 ];
