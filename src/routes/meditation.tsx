@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { INSTRUMENTALS, type Instrumental } from "@/lib/instrumentals";
+import { useGlobalAudio } from "@/lib/audio-player";
 import { Play, Pause, Sparkles, Maximize2, Minimize2, Volume2 } from "lucide-react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/meditation")({
   head: () => ({
@@ -16,53 +16,12 @@ export const Route = createFileRoute("/meditation")({
 });
 
 function MeditationPage() {
-  const [current, setCurrent] = useState<Instrumental | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.7);
+  const { current, playing, volume, play, toggle, setVolume } = useGlobalAudio();
   const [focus, setFocus] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const wakeLockRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = volume;
-  }, [volume]);
-
-  // Wake Lock pendant le mode focus
-  useEffect(() => {
-    const acquire = async () => {
-      try {
-        // @ts-ignore
-        if (focus && "wakeLock" in navigator) {
-          // @ts-ignore
-          wakeLockRef.current = await navigator.wakeLock.request("screen");
-        }
-      } catch { /* noop */ }
-    };
-    const release = () => {
-      try { wakeLockRef.current?.release?.(); wakeLockRef.current = null; } catch {}
-    };
-    if (focus) acquire(); else release();
-    return release;
-  }, [focus]);
 
   const select = (i: Instrumental) => {
-    setCurrent(i);
-    setTimeout(() => {
-      const a = audioRef.current;
-      if (!a) return;
-      a.src = i.url;
-      a.loop = true;
-      a.volume = volume;
-      a.play().then(() => setPlaying(true)).catch(() => toast.error("Impossible de lire l'audio"));
-    }, 50);
-  };
-
-  const toggle = () => {
-    const a = audioRef.current;
-    if (!a || !current) return;
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play().then(() => setPlaying(true)); }
+    if (current?.id === i.id) toggle();
+    else play(i);
   };
 
   return (
@@ -74,7 +33,7 @@ function MeditationPage() {
             <Sparkles className="h-3 w-3" /> Instrumentales de prière
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Choisis une ambiance pour accompagner ta méditation.
+            Choisis une ambiance — elle continue de jouer même quand tu lis la Bible.
           </p>
         </div>
 
@@ -84,7 +43,7 @@ function MeditationPage() {
             return (
               <li key={i.id}>
                 <button
-                  onClick={() => (active ? toggle() : select(i))}
+                  onClick={() => select(i)}
                   className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-all ${
                     active ? "border-gold/60 bg-gold/5 shadow-glow" : "border-border bg-card hover:border-gold/40"
                   }`}
@@ -119,13 +78,11 @@ function MeditationPage() {
               <Maximize2 className="h-4 w-4" /> Mode Méditation (sans distraction)
             </button>
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
-              Active "Ne pas déranger" sur ton téléphone pour bloquer les autres notifications.
+              Active "Ne pas déranger" sur ton téléphone pour bloquer les notifications.
             </p>
           </div>
         )}
       </div>
-
-      <audio ref={audioRef} />
 
       {focus && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-8 text-center">
@@ -136,9 +93,7 @@ function MeditationPage() {
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               « Tiens-toi tranquille devant l'Éternel, et espère en lui. » — Ps 37:7
             </p>
-            {current && (
-              <p className="mt-6 text-xs uppercase tracking-widest text-gold">{current.title}</p>
-            )}
+            {current && <p className="mt-6 text-xs uppercase tracking-widest text-gold">{current.title}</p>}
             <div className="mt-8 flex items-center justify-center gap-3">
               <button onClick={toggle} className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-gold text-gold-foreground">
                 {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
