@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Book, Home, Sparkles, Music, User } from "lucide-react";
+import { Book, Home, Sparkles, Music, History } from "lucide-react";
 import type { ReactNode } from "react";
 
 const NAV = [
@@ -7,7 +7,7 @@ const NAV = [
   { to: "/bible", label: "Bible", icon: Book },
   { to: "/assistant", label: "Assistant", icon: Sparkles },
   { to: "/meditation", label: "Prière", icon: Music },
-  { to: "/profil", label: "Profil", icon: User },
+  { to: "/historique", label: "Historique", icon: History },
 ] as const;
 
 export function MobileShell({ children }: { children: ReactNode }) {

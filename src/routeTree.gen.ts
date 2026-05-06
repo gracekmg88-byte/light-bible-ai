@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as MeditationRouteImport } from './routes/meditation'
+import { Route as HistoriqueRouteImport } from './routes/historique'
 import { Route as FavorisRouteImport } from './routes/favoris'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlansIndexRouteImport } from './routes/plans.index'
 import { Route as BibleIndexRouteImport } from './routes/bible.index'
@@ -30,6 +32,11 @@ const MeditationRoute = MeditationRouteImport.update({
   path: '/meditation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoriqueRoute = HistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavorisRoute = FavorisRouteImport.update({
   id: '/favoris',
   path: '/favoris',
@@ -43,6 +50,11 @@ const AuthRoute = AuthRouteImport.update({
 const AssistantRoute = AssistantRouteImport.update({
   id: '/assistant',
   path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,9 +85,11 @@ const BibleBookIdChapterRoute = BibleBookIdChapterRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
   '/plans/$planId': typeof PlansPlanIdRoute
@@ -85,9 +99,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
   '/plans/$planId': typeof PlansPlanIdRoute
@@ -98,9 +114,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
   '/plans/$planId': typeof PlansPlanIdRoute
@@ -112,9 +130,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/historique'
     | '/meditation'
     | '/profil'
     | '/plans/$planId'
@@ -124,9 +144,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/historique'
     | '/meditation'
     | '/profil'
     | '/plans/$planId'
@@ -136,9 +158,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/historique'
     | '/meditation'
     | '/profil'
     | '/plans/$planId'
@@ -149,9 +173,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AssistantRoute: typeof AssistantRoute
   AuthRoute: typeof AuthRoute
   FavorisRoute: typeof FavorisRoute
+  HistoriqueRoute: typeof HistoriqueRoute
   MeditationRoute: typeof MeditationRoute
   ProfilRoute: typeof ProfilRoute
   PlansPlanIdRoute: typeof PlansPlanIdRoute
@@ -176,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeditationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/historique': {
+      id: '/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof HistoriqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favoris': {
       id: '/favoris'
       path: '/favoris'
@@ -195,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/assistant'
       fullPath: '/assistant'
       preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -237,9 +277,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AssistantRoute: AssistantRoute,
   AuthRoute: AuthRoute,
   FavorisRoute: FavorisRoute,
+  HistoriqueRoute: HistoriqueRoute,
   MeditationRoute: MeditationRoute,
   ProfilRoute: ProfilRoute,
   PlansPlanIdRoute: PlansPlanIdRoute,

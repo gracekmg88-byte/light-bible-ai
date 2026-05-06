@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSettings } from "@/lib/user-settings";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp } from "lucide-react";
+import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp, History, Shield, User } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,6 +31,7 @@ function Home() {
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [doneDays, setDoneDays] = useState<Set<number>>(new Set());
   const [stats, setStats] = useState<Stats>({ totalMin: 0, avgPct: 0, sessions: 0 });
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchChapter(ref.book, ref.ch)
@@ -59,6 +60,9 @@ function Home() {
         const avg = Math.round(sess.reduce((a, x) => a + (x.completion_percent ?? 0), 0) / sess.length);
         setStats({ totalMin: Math.round(totalSec / 60), avgPct: avg, sessions: sess.length });
       }
+      const { data: roleRow } = await supabase
+        .from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+      setIsAdmin(!!roleRow);
     })();
   }, [user]);
 
@@ -156,8 +160,11 @@ function Home() {
         <ActionCard to="/bible" icon={<BookIcon className="h-5 w-5" />} title="Lire la Bible" desc="Ancien & Nouveau Testament" />
         <ActionCard to="/assistant" icon={<Sparkles className="h-5 w-5" />} title="Assistant IA" desc="Pose une question" />
         <ActionCard to="/plans" icon={<CalendarDays className="h-5 w-5" />} title="Plans de lecture" desc="7, 30 ou 90 jours" />
-        <ActionCard to="/meditation" icon={<Music className="h-5 w-5" />} title="Méditation" desc="Instrumentales de prière" />
+        <ActionCard to="/meditation" icon={<Music className="h-5 w-5" />} title="Méditation" desc="Instrumentales" />
         <ActionCard to="/favoris" icon={<Star className="h-5 w-5" />} title="Mes favoris" desc="Versets sauvegardés" />
+        <ActionCard to="/historique" icon={<History className="h-5 w-5" />} title="Historique" desc="Mes séances" />
+        <ActionCard to="/profil" icon={<User className="h-5 w-5" />} title="Profil" desc="Mon compte" />
+        {isAdmin && <ActionCard to="/admin" icon={<Shield className="h-5 w-5" />} title="Admin" desc="Tableau de bord" />}
       </section>
     </MobileShell>
   );
