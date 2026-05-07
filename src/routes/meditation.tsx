@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { INSTRUMENTALS, type Instrumental } from "@/lib/instrumentals";
 import { useGlobalAudio } from "@/lib/audio-player";
-import { Play, Pause, Sparkles, Maximize2, Minimize2, Volume2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Play, Pause, Sparkles, Maximize2, Minimize2, Volume2, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/meditation")({
   head: () => ({
@@ -16,8 +17,26 @@ export const Route = createFileRoute("/meditation")({
 });
 
 function MeditationPage() {
-  const { current, playing, volume, play, toggle, setVolume } = useGlobalAudio();
+  const { current, playing, loading, volume, play, toggle, setVolume } = useGlobalAudio();
   const [focus, setFocus] = useState(false);
+  const [customs, setCustoms] = useState<Instrumental[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("custom_instrumentals")
+        .select("id,title,mood,storage_path")
+        .order("created_at", { ascending: false });
+      if (!data) return;
+      const list = data.map((d) => {
+        const { data: pub } = supabase.storage.from("instrumentals").getPublicUrl(d.storage_path);
+        return { id: d.id, title: d.title, mood: d.mood || "Importé", url: pub.publicUrl };
+      });
+      setCustoms(list);
+    })();
+  }, []);
+
+  const all = [...customs, ...INSTRUMENTALS];
 
   const select = (i: Instrumental) => {
     if (current?.id === i.id) toggle();
@@ -38,7 +57,7 @@ function MeditationPage() {
         </div>
 
         <ul className="mt-4 space-y-2">
-          {INSTRUMENTALS.map((i) => {
+          {all.map((i) => {
             const active = current?.id === i.id;
             return (
               <li key={i.id}>
@@ -53,7 +72,7 @@ function MeditationPage() {
                     <p className="text-xs text-muted-foreground">{i.mood}</p>
                   </div>
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full ${active ? "bg-gradient-gold text-gold-foreground" : "bg-secondary"}`}>
-                    {active && playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    {active && loading ? <Loader2 className="h-4 w-4 animate-spin" /> : active && playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </div>
                 </button>
               </li>

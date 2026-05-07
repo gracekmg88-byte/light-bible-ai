@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSettings } from "@/lib/user-settings";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp, History, Shield, User } from "lucide-react";
+import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp, History, Shield, User, NotebookPen } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -81,9 +81,9 @@ function Home() {
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gold">
             <Sun className="h-3.5 w-3.5" /> Bible Lumière
           </p>
-          <h1 className="mt-2 font-display text-4xl leading-tight">
+          <h1 className="mt-2 font-display text-4xl leading-[1.2]">
             Que ta Parole<br/>
-            <span className="bg-gradient-gold bg-clip-text text-transparent">soit ma lumière.</span>
+            <span className="inline-block bg-gradient-gold bg-clip-text pb-2 text-transparent">soit ma lumière.</span>
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Lis, médite et comprends les Écritures, accompagné par une intelligence spirituelle.
@@ -162,6 +162,7 @@ function Home() {
         <ActionCard to="/plans" icon={<CalendarDays className="h-5 w-5" />} title="Plans de lecture" desc="7, 30 ou 90 jours" />
         <ActionCard to="/meditation" icon={<Music className="h-5 w-5" />} title="Méditation" desc="Instrumentales" />
         <ActionCard to="/favoris" icon={<Star className="h-5 w-5" />} title="Mes favoris" desc="Versets sauvegardés" />
+        <ActionCard to="/agenda" icon={<NotebookPen className="h-5 w-5" />} title="Mon agenda" desc="Pensées & inspirations" />
         <ActionCard to="/historique" icon={<History className="h-5 w-5" />} title="Historique" desc="Mes séances" />
         <ActionCard to="/profil" icon={<User className="h-5 w-5" />} title="Profil" desc="Mon compte" />
         {isAdmin && <ActionCard to="/admin" icon={<Shield className="h-5 w-5" />} title="Admin" desc="Tableau de bord" />}

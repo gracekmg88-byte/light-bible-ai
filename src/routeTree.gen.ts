@@ -15,6 +15,7 @@ import { Route as HistoriqueRouteImport } from './routes/historique'
 import { Route as FavorisRouteImport } from './routes/favoris'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlansIndexRouteImport } from './routes/plans.index'
@@ -52,6 +53,11 @@ const AssistantRoute = AssistantRouteImport.update({
   path: '/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -86,6 +92,7 @@ const BibleBookIdChapterRoute = BibleBookIdChapterRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agenda': typeof AgendaRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agenda': typeof AgendaRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agenda': typeof AgendaRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/agenda'
     | '/assistant'
     | '/auth'
     | '/favoris'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/agenda'
     | '/assistant'
     | '/auth'
     | '/favoris'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/agenda'
     | '/assistant'
     | '/auth'
     | '/favoris'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AgendaRoute: typeof AgendaRoute
   AssistantRoute: typeof AssistantRoute
   AuthRoute: typeof AuthRoute
   FavorisRoute: typeof FavorisRoute
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -278,6 +298,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AgendaRoute: AgendaRoute,
   AssistantRoute: AssistantRoute,
   AuthRoute: AuthRoute,
   FavorisRoute: FavorisRoute,

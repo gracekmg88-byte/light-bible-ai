@@ -1,9 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, Users, Clock, BookOpen, TrendingUp } from "lucide-react";
+import { Shield, Users, Clock, BookOpen, Music, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -30,12 +30,50 @@ type SessionRow = {
   created_at: string;
 };
 
+type CustomInstrumental = { id: string; title: string; mood: string; storage_path: string };
+
 function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [instr, setInstr] = useState<CustomInstrumental[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [mood, setMood] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadInstr = async () => {
+    const { data } = await supabase.from("custom_instrumentals").select("*").order("created_at", { ascending: false });
+    setInstr((data ?? []) as CustomInstrumental[]);
+  };
+
+  const handleUpload = async () => {
+    const file = fileRef.current?.files?.[0];
+    if (!file || !user) return toast.error("Choisis un fichier audio");
+    if (!title.trim()) return toast.error("Donne un titre");
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "mp3";
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("instrumentals").upload(path, file, { contentType: file.type });
+    if (upErr) { setUploading(false); return toast.error(upErr.message); }
+    const { error: insErr } = await supabase.from("custom_instrumentals").insert({
+      title: title.trim(), mood: mood.trim(), storage_path: path, uploaded_by: user.id,
+    });
+    setUploading(false);
+    if (insErr) return toast.error(insErr.message);
+    toast.success("Instrumental ajouté");
+    setTitle(""); setMood("");
+    if (fileRef.current) fileRef.current.value = "";
+    loadInstr();
+  };
+
+  const removeInstr = async (i: CustomInstrumental) => {
+    await supabase.storage.from("instrumentals").remove([i.storage_path]);
+    const { error } = await supabase.from("custom_instrumentals").delete().eq("id", i.id);
+    if (error) toast.error(error.message); else { toast.success("Supprimé"); loadInstr(); }
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -63,6 +101,7 @@ function AdminPage() {
       setUsers((u.data ?? []) as UserRow[]);
       setSessions((s.data ?? []) as SessionRow[]);
       setLoading(false);
+      loadInstr();
     })();
   }, [isAdmin]);
 
@@ -153,6 +192,54 @@ function AdminPage() {
               </li>
             ))}
             {sessions.length === 0 && <p className="text-center text-xs text-muted-foreground">Aucune séance.</p>}
+          </ul>
+        </section>
+
+        {/* Instrumentales */}
+        <section>
+          <h2 className="mb-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-gold">
+            <Music className="h-3 w-3" /> Instrumentales (admin)
+          </h2>
+          <div className="rounded-2xl border border-border bg-card p-3 space-y-2">
+            <input
+              placeholder="Titre"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Ambiance (optionnel)"
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="audio/*"
+              className="block w-full text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-xs"
+            />
+            <button
+              onClick={handleUpload}
+              disabled={uploading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-gold py-2 text-sm font-medium text-gold-foreground disabled:opacity-60"
+            >
+              <Upload className="h-4 w-4" /> {uploading ? "Envoi…" : "Importer l'instrumental"}
+            </button>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {instr.map((i) => (
+              <li key={i.id} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 text-xs">
+                <div>
+                  <p className="font-display text-sm">{i.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{i.mood || "—"}</p>
+                </div>
+                <button onClick={() => removeInstr(i)} className="rounded-lg border border-border p-2 text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+            {instr.length === 0 && <p className="text-center text-xs text-muted-foreground">Aucun instrumental importé.</p>}
           </ul>
         </section>
       </div>
