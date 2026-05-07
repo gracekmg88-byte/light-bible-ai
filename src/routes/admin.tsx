@@ -1,9 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, Users, Clock, BookOpen, TrendingUp } from "lucide-react";
+import { Shield, Users, Clock, BookOpen, Music, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
