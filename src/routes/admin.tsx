@@ -101,6 +101,7 @@ function AdminPage() {
       setUsers((u.data ?? []) as UserRow[]);
       setSessions((s.data ?? []) as SessionRow[]);
       setLoading(false);
+      loadInstr();
     })();
   }, [isAdmin]);
 
