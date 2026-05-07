@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_entries: {
+        Row: {
+          content: string
+          created_at: string
+          entry_date: string
+          id: string
+          mood: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_instrumentals: {
+        Row: {
+          created_at: string
+          id: string
+          mood: string
+          storage_path: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood?: string
+          storage_path: string
+          title: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: string
+          storage_path?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           book_id: number
