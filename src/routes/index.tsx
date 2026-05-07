@@ -162,6 +162,7 @@ function Home() {
         <ActionCard to="/plans" icon={<CalendarDays className="h-5 w-5" />} title="Plans de lecture" desc="7, 30 ou 90 jours" />
         <ActionCard to="/meditation" icon={<Music className="h-5 w-5" />} title="Méditation" desc="Instrumentales" />
         <ActionCard to="/favoris" icon={<Star className="h-5 w-5" />} title="Mes favoris" desc="Versets sauvegardés" />
+        <ActionCard to="/agenda" icon={<NotebookPen className="h-5 w-5" />} title="Mon agenda" desc="Pensées & inspirations" />
         <ActionCard to="/historique" icon={<History className="h-5 w-5" />} title="Historique" desc="Mes séances" />
         <ActionCard to="/profil" icon={<User className="h-5 w-5" />} title="Profil" desc="Mon compte" />
         {isAdmin && <ActionCard to="/admin" icon={<Shield className="h-5 w-5" />} title="Admin" desc="Tableau de bord" />}
