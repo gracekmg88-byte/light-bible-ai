@@ -30,12 +30,50 @@ type SessionRow = {
   created_at: string;
 };
 
+type CustomInstrumental = { id: string; title: string; mood: string; storage_path: string };
+
 function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [instr, setInstr] = useState<CustomInstrumental[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [mood, setMood] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadInstr = async () => {
+    const { data } = await supabase.from("custom_instrumentals").select("*").order("created_at", { ascending: false });
+    setInstr((data ?? []) as CustomInstrumental[]);
+  };
+
+  const handleUpload = async () => {
+    const file = fileRef.current?.files?.[0];
+    if (!file || !user) return toast.error("Choisis un fichier audio");
+    if (!title.trim()) return toast.error("Donne un titre");
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "mp3";
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("instrumentals").upload(path, file, { contentType: file.type });
+    if (upErr) { setUploading(false); return toast.error(upErr.message); }
+    const { error: insErr } = await supabase.from("custom_instrumentals").insert({
+      title: title.trim(), mood: mood.trim(), storage_path: path, uploaded_by: user.id,
+    });
+    setUploading(false);
+    if (insErr) return toast.error(insErr.message);
+    toast.success("Instrumental ajouté");
+    setTitle(""); setMood("");
+    if (fileRef.current) fileRef.current.value = "";
+    loadInstr();
+  };
+
+  const removeInstr = async (i: CustomInstrumental) => {
+    await supabase.storage.from("instrumentals").remove([i.storage_path]);
+    const { error } = await supabase.from("custom_instrumentals").delete().eq("id", i.id);
+    if (error) toast.error(error.message); else { toast.success("Supprimé"); loadInstr(); }
+  };
 
   useEffect(() => {
     if (authLoading) return;
