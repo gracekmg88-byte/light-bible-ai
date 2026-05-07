@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSettings } from "@/lib/user-settings";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp, History, Shield, User } from "lucide-react";
+import { Sparkles, Book as BookIcon, Star, ArrowRight, Sun, CalendarDays, Music, Clock, TrendingUp, History, Shield, User, NotebookPen } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
