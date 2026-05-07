@@ -194,6 +194,54 @@ function AdminPage() {
             {sessions.length === 0 && <p className="text-center text-xs text-muted-foreground">Aucune séance.</p>}
           </ul>
         </section>
+
+        {/* Instrumentales */}
+        <section>
+          <h2 className="mb-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-gold">
+            <Music className="h-3 w-3" /> Instrumentales (admin)
+          </h2>
+          <div className="rounded-2xl border border-border bg-card p-3 space-y-2">
+            <input
+              placeholder="Titre"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Ambiance (optionnel)"
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="audio/*"
+              className="block w-full text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-xs"
+            />
+            <button
+              onClick={handleUpload}
+              disabled={uploading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-gold py-2 text-sm font-medium text-gold-foreground disabled:opacity-60"
+            >
+              <Upload className="h-4 w-4" /> {uploading ? "Envoi…" : "Importer l'instrumental"}
+            </button>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {instr.map((i) => (
+              <li key={i.id} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 text-xs">
+                <div>
+                  <p className="font-display text-sm">{i.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{i.mood || "—"}</p>
+                </div>
+                <button onClick={() => removeInstr(i)} className="rounded-lg border border-border p-2 text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+            {instr.length === 0 && <p className="text-center text-xs text-muted-foreground">Aucun instrumental importé.</p>}
+          </ul>
+        </section>
       </div>
     </MobileShell>
   );
