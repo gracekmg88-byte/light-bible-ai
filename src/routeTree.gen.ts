@@ -9,9 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as MeditationRouteImport } from './routes/meditation'
 import { Route as HistoriqueRouteImport } from './routes/historique'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FavorisRouteImport } from './routes/favoris'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AssistantRouteImport } from './routes/assistant'
@@ -23,6 +25,11 @@ import { Route as BibleIndexRouteImport } from './routes/bible.index'
 import { Route as PlansPlanIdRouteImport } from './routes/plans.$planId'
 import { Route as BibleBookIdChapterRouteImport } from './routes/bible.$bookId.$chapter'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
@@ -36,6 +43,11 @@ const MeditationRoute = MeditationRouteImport.update({
 const HistoriqueRoute = HistoriqueRouteImport.update({
   id: '/historique',
   path: '/historique',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavorisRoute = FavorisRouteImport.update({
@@ -96,9 +108,11 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/bible/': typeof BibleIndexRoute
   '/plans/': typeof PlansIndexRoute
@@ -111,9 +125,11 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/bible': typeof BibleIndexRoute
   '/plans': typeof PlansIndexRoute
@@ -127,9 +143,11 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
   '/favoris': typeof FavorisRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/historique': typeof HistoriqueRoute
   '/meditation': typeof MeditationRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/bible/': typeof BibleIndexRoute
   '/plans/': typeof PlansIndexRoute
@@ -144,9 +162,11 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/forgot-password'
     | '/historique'
     | '/meditation'
     | '/profil'
+    | '/reset-password'
     | '/plans/$planId'
     | '/bible/'
     | '/plans/'
@@ -159,9 +179,11 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/forgot-password'
     | '/historique'
     | '/meditation'
     | '/profil'
+    | '/reset-password'
     | '/plans/$planId'
     | '/bible'
     | '/plans'
@@ -174,9 +196,11 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/auth'
     | '/favoris'
+    | '/forgot-password'
     | '/historique'
     | '/meditation'
     | '/profil'
+    | '/reset-password'
     | '/plans/$planId'
     | '/bible/'
     | '/plans/'
@@ -190,9 +214,11 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   AuthRoute: typeof AuthRoute
   FavorisRoute: typeof FavorisRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   HistoriqueRoute: typeof HistoriqueRoute
   MeditationRoute: typeof MeditationRoute
   ProfilRoute: typeof ProfilRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   PlansPlanIdRoute: typeof PlansPlanIdRoute
   BibleIndexRoute: typeof BibleIndexRoute
   PlansIndexRoute: typeof PlansIndexRoute
@@ -201,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil': {
       id: '/profil'
       path: '/profil'
@@ -220,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/historique'
       fullPath: '/historique'
       preLoaderRoute: typeof HistoriqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favoris': {
@@ -302,9 +342,11 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   AuthRoute: AuthRoute,
   FavorisRoute: FavorisRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   HistoriqueRoute: HistoriqueRoute,
   MeditationRoute: MeditationRoute,
   ProfilRoute: ProfilRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   PlansPlanIdRoute: PlansPlanIdRoute,
   BibleIndexRoute: BibleIndexRoute,
   PlansIndexRoute: PlansIndexRoute,
@@ -313,3 +355,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
