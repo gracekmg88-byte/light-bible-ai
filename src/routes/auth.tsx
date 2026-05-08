@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,10 +31,27 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Compte créé ! Vérifie ton email.");
+        // Tentative de connexion immédiate (auto-confirm activé)
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          toast.success("Compte créé ! Connecte-toi.");
+          setMode("signin");
+        } else {
+          toast.success("Bienvenue !");
+          navigate({ to: "/" });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("invalid")) {
+            toast.error("Email ou mot de passe incorrect");
+          } else if (error.message.toLowerCase().includes("not confirmed")) {
+            toast.error("Email non confirmé. Vérifie ta boîte mail.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
         navigate({ to: "/" });
       }
     } catch (err: any) {
@@ -84,9 +101,14 @@ function AuthPage() {
           Continuer avec Google
         </button>
 
-        <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-6 text-xs text-muted-foreground">
-          {mode === "signin" ? "Pas de compte ? S'inscrire" : "Déjà inscrit ? Se connecter"}
-        </button>
+        <div className="mt-6 flex w-full flex-col items-center gap-2 text-xs text-muted-foreground">
+          <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
+            {mode === "signin" ? "Pas de compte ? S'inscrire" : "Déjà inscrit ? Se connecter"}
+          </button>
+          {mode === "signin" && (
+            <Link to="/forgot-password" className="text-gold">Mot de passe oublié ?</Link>
+          )}
+        </div>
       </div>
     </MobileShell>
   );
