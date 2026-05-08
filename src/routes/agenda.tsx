@@ -135,7 +135,70 @@ function AgendaPage() {
     else { toast.success("Entrée supprimée"); load(); }
   };
 
-  if (authLoading) return <MobileShell><div className="p-8 text-center text-sm text-muted-foreground">Chargement…</div></MobileShell>;
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const exportTxt = () => {
+    if (entries.length === 0) { toast.error("Aucune entrée à exporter"); return; }
+    const lines = entries.map((e) => {
+      return [
+        `Date : ${formatDate(e.entry_date)}`,
+        `Titre : ${e.title || "(sans titre)"}`,
+        `Humeur : ${e.mood || "—"}`,
+        "",
+        e.content || "",
+        "",
+        "─────────────────────────────",
+        "",
+      ].join("\n");
+    });
+    const blob = new Blob([`Mon agenda — Bible Lumière\n\n${lines.join("\n")}`], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `agenda-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  const exportPdf = () => {
+    if (entries.length === 0) { toast.error("Aucune entrée à exporter"); return; }
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 48;
+    const width = doc.internal.pageSize.getWidth() - margin * 2;
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = margin;
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+    doc.text("Mon agenda — Bible Lumière", margin, y); y += 28;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(120);
+    doc.text(`Exporté le ${formatDate(new Date().toISOString().slice(0, 10))}`, margin, y);
+    y += 24;
+
+    const ensure = (h: number) => { if (y + h > pageH - margin) { doc.addPage(); y = margin; } };
+
+    entries.forEach((e) => {
+      ensure(80);
+      doc.setTextColor(180, 140, 30);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+      doc.text(formatDate(e.entry_date).toUpperCase(), margin, y); y += 14;
+      doc.setTextColor(20);
+      doc.setFontSize(15);
+      const titleLines = doc.splitTextToSize(e.title || "(sans titre)", width);
+      doc.text(titleLines, margin, y); y += titleLines.length * 18;
+      if (e.mood) {
+        doc.setFont("helvetica", "italic"); doc.setFontSize(10); doc.setTextColor(110);
+        doc.text(`Humeur : ${e.mood}`, margin, y); y += 14;
+      }
+      doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(40);
+      const body = doc.splitTextToSize(e.content || "—", width);
+      body.forEach((line: string) => { ensure(16); doc.text(line, margin, y); y += 15; });
+      y += 10;
+      doc.setDrawColor(220); doc.line(margin, y, margin + width, y); y += 18;
+    });
+
+    doc.save(`agenda-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
+
 
   if (!user) return (
     <MobileShell>
