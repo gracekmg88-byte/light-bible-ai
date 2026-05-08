@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, User as UserIcon, Mail } from "lucide-react";
+import { toast } from "sonner";
+import { LogOut, User as UserIcon, Mail, KeyRound, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/profil")({
   component: Profil,
@@ -11,6 +13,10 @@ export const Route = createFileRoute("/profil")({
 function Profil() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [showPwd, setShowPwd] = useState(false);
+  const [pwd, setPwd] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
 
   if (loading) return <MobileShell><div /></MobileShell>;
 
@@ -32,10 +38,25 @@ function Profil() {
     );
   }
 
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwd.length < 6) { toast.error("6 caractères minimum"); return; }
+    if (pwd !== confirm) { toast.error("Les mots de passe ne correspondent pas"); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pwd });
+      if (error) throw error;
+      toast.success("Mot de passe mis à jour");
+      setPwd(""); setConfirm(""); setShowPwd(false);
+    } catch (err: any) {
+      toast.error(err.message ?? "Erreur");
+    } finally { setSaving(false); }
+  };
+
   return (
     <MobileShell>
       <PageHeader title="Profil" />
-      <div className="px-5 pt-6">
+      <div className="px-5 pt-6 space-y-4">
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-aurora">
@@ -49,8 +70,42 @@ function Profil() {
         </div>
 
         <button
+          onClick={() => setShowPwd(!showPwd)}
+          className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+              <KeyRound className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Changer le mot de passe</p>
+              <p className="text-[11px] text-muted-foreground">Mets à jour ton mot de passe</p>
+            </div>
+          </div>
+          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showPwd ? "rotate-90" : ""}`} />
+        </button>
+
+        {showPwd && (
+          <form onSubmit={changePassword} className="space-y-2 rounded-2xl border border-border bg-card p-4">
+            <input
+              type="password" minLength={6} required value={pwd} onChange={(e) => setPwd(e.target.value)}
+              placeholder="Nouveau mot de passe"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-gold focus:outline-none"
+            />
+            <input
+              type="password" minLength={6} required value={confirm} onChange={(e) => setConfirm(e.target.value)}
+              placeholder="Confirmer le mot de passe"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:border-gold focus:outline-none"
+            />
+            <button type="submit" disabled={saving} className="w-full rounded-xl bg-gradient-gold py-2.5 text-sm font-medium text-gold-foreground disabled:opacity-50">
+              {saving ? "…" : "Mettre à jour"}
+            </button>
+          </form>
+        )}
+
+        <button
           onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3 text-sm text-destructive hover:bg-destructive/10"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3 text-sm text-destructive hover:bg-destructive/10"
         >
           <LogOut className="h-4 w-4" /> Se déconnecter
         </button>
