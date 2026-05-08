@@ -101,9 +101,14 @@ function AuthPage() {
           Continuer avec Google
         </button>
 
-        <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-6 text-xs text-muted-foreground">
-          {mode === "signin" ? "Pas de compte ? S'inscrire" : "Déjà inscrit ? Se connecter"}
-        </button>
+        <div className="mt-6 flex w-full flex-col items-center gap-2 text-xs text-muted-foreground">
+          <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
+            {mode === "signin" ? "Pas de compte ? S'inscrire" : "Déjà inscrit ? Se connecter"}
+          </button>
+          {mode === "signin" && (
+            <Link to="/forgot-password" className="text-gold">Mot de passe oublié ?</Link>
+          )}
+        </div>
       </div>
     </MobileShell>
   );
