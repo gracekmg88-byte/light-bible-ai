@@ -223,6 +223,16 @@ function AgendaPage() {
         }
       />
       <div className="px-5 pt-6 pb-4 space-y-3">
+        {entries.length > 0 && (
+          <div className="flex gap-2">
+            <button onClick={exportPdf} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-card py-2 text-xs font-medium text-gold">
+              <FileDown className="h-3.5 w-3.5" /> Exporter PDF
+            </button>
+            <button onClick={exportTxt} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2 text-xs font-medium">
+              <FileText className="h-3.5 w-3.5" /> Exporter .txt
+            </button>
+          </div>
+        )}
         {entries.length === 0 && !editing && (
           <div className="py-12 text-center">
             <NotebookPen className="mx-auto h-10 w-10 text-muted-foreground/60" />
