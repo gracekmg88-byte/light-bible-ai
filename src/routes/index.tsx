@@ -81,9 +81,9 @@ function Home() {
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gold">
             <Sun className="h-3.5 w-3.5" /> Bible Lumière
           </p>
-          <h1 className="mt-2 font-display text-4xl leading-[1.2]">
-            Que ta Parole<br/>
-            <span className="inline-block bg-gradient-gold bg-clip-text pb-2 text-transparent">soit ma lumière.</span>
+          <h1 className="mt-2 font-display text-4xl leading-[1.35]">
+            Que ta Parole
+            <span className="mt-1 block text-gold">soit ma lumière.</span>
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Lis, médite et comprends les Écritures, accompagné par une intelligence spirituelle.
