@@ -56,29 +56,37 @@ function MeditationPage() {
           </p>
         </div>
 
-        <ul className="mt-4 space-y-2">
-          {all.map((i) => {
-            const active = current?.id === i.id;
-            return (
-              <li key={i.id}>
-                <button
-                  onClick={() => select(i)}
-                  className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-all ${
-                    active ? "border-gold/60 bg-gold/5 shadow-glow" : "border-border bg-card hover:border-gold/40"
-                  }`}
-                >
-                  <div>
-                    <p className="font-display text-base">{i.title}</p>
-                    <p className="text-xs text-muted-foreground">{i.mood}</p>
-                  </div>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${active ? "bg-gradient-gold text-gold-foreground" : "bg-secondary"}`}>
-                    {active && loading ? <Loader2 className="h-4 w-4 animate-spin" /> : active && playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </div>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        {all.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Aucune instrumentale disponible pour le moment. Un administrateur peut en importer depuis le tableau de bord.
+            </p>
+          </div>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {all.map((i) => {
+              const active = current?.id === i.id;
+              return (
+                <li key={i.id}>
+                  <button
+                    onClick={() => select(i)}
+                    className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-all ${
+                      active ? "border-gold/60 bg-gold/5 shadow-glow" : "border-border bg-card hover:border-gold/40"
+                    }`}
+                  >
+                    <div>
+                      <p className="font-display text-base">{i.title}</p>
+                      <p className="text-xs text-muted-foreground">{i.mood}</p>
+                    </div>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${active ? "bg-gradient-gold text-gold-foreground" : "bg-secondary"}`}>
+                      {active && loading ? <Loader2 className="h-4 w-4 animate-spin" /> : active && playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         {current && (
           <div className="mt-4 rounded-2xl border border-border bg-card p-4">
