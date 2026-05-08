@@ -5,7 +5,8 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Plus, Trash2, NotebookPen, Save, Check, Loader2 } from "lucide-react";
+import { Plus, Trash2, NotebookPen, Save, Check, Loader2, FileText, FileDown } from "lucide-react";
+import { jsPDF } from "jspdf";
 
 export const Route = createFileRoute("/agenda")({
   head: () => ({ meta: [{ title: "Mon agenda — Bible Lumière" }] }),
