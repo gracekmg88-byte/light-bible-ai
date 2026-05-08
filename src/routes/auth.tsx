@@ -31,10 +31,27 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Compte créé ! Vérifie ton email.");
+        // Tentative de connexion immédiate (auto-confirm activé)
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          toast.success("Compte créé ! Connecte-toi.");
+          setMode("signin");
+        } else {
+          toast.success("Bienvenue !");
+          navigate({ to: "/" });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("invalid")) {
+            toast.error("Email ou mot de passe incorrect");
+          } else if (error.message.toLowerCase().includes("not confirmed")) {
+            toast.error("Email non confirmé. Vérifie ta boîte mail.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
         navigate({ to: "/" });
       }
     } catch (err: any) {
