@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User as UserIcon, Mail, KeyRound, ChevronRight } from "lucide-react";
+import { LogOut, User as UserIcon, Mail, KeyRound, ChevronRight, ShieldCheck, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/profil")({
   component: Profil,
@@ -17,6 +17,69 @@ function Profil() {
   const [pwd, setPwd] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // 2FA
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
+  const [secret, setSecret] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [pendingFactorId, setPendingFactorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.auth.mfa.listFactors().then(({ data }) => {
+      const totp = data?.totp?.find((f) => f.status === "verified");
+      setMfaEnabled(!!totp);
+      setMfaFactorId(totp?.id ?? null);
+    });
+  }, [user]);
+
+  const startEnroll = async () => {
+    setEnrolling(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+      if (error) throw error;
+      setQr(data.totp.qr_code);
+      setSecret(data.totp.secret);
+      setPendingFactorId(data.id);
+    } catch (e: any) {
+      toast.error(e.message ?? "Impossible d'activer la 2FA");
+      setEnrolling(false);
+    }
+  };
+
+  const verifyEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingFactorId) return;
+    try {
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+      if (ce) throw ce;
+      const { error: ve } = await supabase.auth.mfa.verify({
+        factorId: pendingFactorId, challengeId: ch.id, code: otpCode,
+      });
+      if (ve) throw ve;
+      toast.success("Double authentification activée");
+      setMfaEnabled(true);
+      setMfaFactorId(pendingFactorId);
+      setQr(null); setSecret(null); setOtpCode(""); setPendingFactorId(null); setEnrolling(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Code incorrect");
+    }
+  };
+
+  const disableMfa = async () => {
+    if (!mfaFactorId) return;
+    if (!confirm) {/* unused, just to silence */}
+    const ok = window.confirm("Désactiver la double authentification ?");
+    if (!ok) return;
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId });
+    if (error) { toast.error(error.message); return; }
+    setMfaEnabled(false);
+    setMfaFactorId(null);
+    toast.success("2FA désactivée");
+  };
 
   if (loading) return <MobileShell><div /></MobileShell>;
 
