@@ -214,6 +214,35 @@ function ChapterPage() {
           </div>
         </div>
       )}
+
+      {showVersions && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm" onClick={() => setShowVersions(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl border-t border-border bg-card p-5 shadow-soft">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-gold">
+                <BookOpen className="h-3 w-3" /> Choisir une version
+              </p>
+              <button onClick={() => setShowVersions(false)} className="rounded-lg p-1 text-muted-foreground"><X className="h-5 w-5" /></button>
+            </div>
+            <ul className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {BIBLE_VERSIONS.map((v) => (
+                <li key={v.id}>
+                  <button
+                    onClick={() => { setVersion(v.id); setVersionState(v.id); setShowVersions(false); }}
+                    className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left ${version === v.id ? "border-gold/60 bg-gold/5" : "border-border bg-secondary/30"}`}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{v.name}</p>
+                      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{v.lang === "fr" ? "Français" : "English"} · {v.short}</p>
+                    </div>
+                    {version === v.id && <span className="text-[10px] font-bold text-gold">ACTIF</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </MobileShell>
   );
 }
