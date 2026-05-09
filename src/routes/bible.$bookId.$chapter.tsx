@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { fetchChapter, getBook, type Verse } from "@/lib/bible-books";
+import { BIBLE_VERSIONS, getVersion, setVersion } from "@/lib/bible-versions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useReadingTracker } from "@/lib/reading-tracker";
-import { ChevronLeft, ChevronRight, Star, Volume2, MessageCircle, Type, X, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Volume2, MessageCircle, Type, X, Sparkles, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/bible/$bookId/$chapter")({
@@ -19,6 +20,8 @@ function ChapterPage() {
   const ch = Number(chapter);
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [version, setVersionState] = useState<string>(getVersion());
+  const [showVersions, setShowVersions] = useState(false);
   const [fontSize, setFontSize] = useState(17);
   const [favSet, setFavSet] = useState<Set<number>>(new Set());
   const [active, setActive] = useState<Verse | null>(null);
@@ -38,11 +41,11 @@ function ChapterPage() {
   useEffect(() => {
     if (!book) return;
     setLoading(true);
-    fetchChapter(book.id, ch)
+    fetchChapter(book.id, ch, version)
       .then((vs) => setVerses(vs))
       .catch(() => toast.error("Erreur de chargement"))
       .finally(() => setLoading(false));
-  }, [book, ch]);
+  }, [book, ch, version]);
 
   useEffect(() => {
     if (!user || !book) return;
@@ -130,6 +133,9 @@ function ChapterPage() {
         subtitle={book.testament === "AT" ? "Ancien Testament" : "Nouveau Testament"}
         right={
           <div className="flex items-center gap-1">
+            <button onClick={() => setShowVersions(true)} className="rounded-lg border border-border px-2 py-1.5 text-[10px] font-bold tracking-wider text-gold" aria-label="Changer de version">
+              {BIBLE_VERSIONS.find((v) => v.id === version)?.short ?? "LSG"}
+            </button>
             <button onClick={playChapter} disabled={loading || verses.length === 0} className={`rounded-lg border p-2 ${chapterPlaying ? "border-gold/60 bg-gold/10 text-gold" : "border-border text-foreground"}`} aria-label="Écouter le chapitre">
               <Volume2 className="h-4 w-4" />
             </button>
