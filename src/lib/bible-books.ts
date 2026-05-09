@@ -80,12 +80,11 @@ export const getBook = (id: number) => BIBLE_BOOKS.find((b) => b.id === id);
 
 export type Verse = { pk: number; verse: number; text: string };
 
-// Bolls.life public API. LSG = Louis Segond 1910 (domaine public).
-export async function fetchChapter(bookId: number, chapter: number): Promise<Verse[]> {
-  const res = await fetch(`https://bolls.life/get-text/FRLSG/${bookId}/${chapter}/`);
+// Bolls.life public API. Plusieurs versions supportées.
+export async function fetchChapter(bookId: number, chapter: number, version: string = "FRLSG"): Promise<Verse[]> {
+  const res = await fetch(`https://bolls.life/get-text/${version}/${bookId}/${chapter}/`);
   if (!res.ok) throw new Error("Erreur de chargement du chapitre");
   const data = (await res.json()) as Array<{ pk: number; verse: number; text: string }>;
-  // Strip simple HTML tags (Bolls renvoie parfois des balises)
   return data.map((v) => ({ ...v, text: v.text.replace(/<[^>]+>/g, "").trim() }));
 }
 

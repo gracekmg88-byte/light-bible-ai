@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { INSTRUMENTALS, type Instrumental } from "@/lib/instrumentals";
 import { useGlobalAudio } from "@/lib/audio-player";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, Pause, Sparkles, Maximize2, Minimize2, Volume2, Loader2 } from "lucide-react";
 
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/meditation")({
 });
 
 function MeditationPage() {
+  const { user, loading: authLoading } = useRequireAuth();
   const { current, playing, loading, volume, play, toggle, setVolume } = useGlobalAudio();
   const [focus, setFocus] = useState(false);
   const [customs, setCustoms] = useState<Instrumental[]>([]);
@@ -42,6 +44,8 @@ function MeditationPage() {
     if (current?.id === i.id) toggle();
     else play(i);
   };
+
+  if (authLoading || !user) return <MobileShell><div /></MobileShell>;
 
   return (
     <MobileShell>

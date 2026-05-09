@@ -18,6 +18,9 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  // 2FA challenge during login
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   useEffect(() => { if (user) navigate({ to: "/" }); }, [user, navigate]);
 
@@ -52,6 +55,16 @@ function AuthPage() {
           }
           return;
         }
+        // Vérifie si 2FA est requis
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+          const { data: factors } = await supabase.auth.mfa.listFactors();
+          const totp = factors?.totp?.find((f) => f.status === "verified");
+          if (totp) {
+            setMfaFactorId(totp.id);
+            return;
+          }
+        }
         navigate({ to: "/" });
       }
     } catch (err: any) {
@@ -72,6 +85,24 @@ function AuthPage() {
     }
   };
 
+  const verifyMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaFactorId) return;
+    setLoading(true);
+    try {
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+      if (ce) throw ce;
+      const { error: ve } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: ch.id, code: mfaCode });
+      if (ve) throw ve;
+      toast.success("Authentification réussie");
+      navigate({ to: "/" });
+    } catch (err: any) {
+      toast.error(err.message ?? "Code incorrect");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <MobileShell>
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
@@ -83,15 +114,35 @@ function AuthPage() {
           <p className="mt-1 text-sm text-muted-foreground">{mode === "signin" ? "Heureux de te revoir" : "Crée ton compte"}</p>
         </div>
 
-        <form onSubmit={submit} className="w-full space-y-3">
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
-            className="w-full rounded-2xl border border-border bg-input px-4 py-3 text-sm focus:border-gold focus:outline-none" />
-          <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe"
-            className="w-full rounded-2xl border border-border bg-input px-4 py-3 text-sm focus:border-gold focus:outline-none" />
-          <button type="submit" disabled={loading} className="w-full rounded-2xl bg-gradient-gold py-3 text-sm font-semibold text-gold-foreground disabled:opacity-50">
-            {loading ? "…" : mode === "signin" ? "Se connecter" : "Créer mon compte"}
-          </button>
-        </form>
+        {mfaFactorId ? (
+          <form onSubmit={verifyMfa} className="w-full space-y-3">
+            <p className="text-center text-sm text-muted-foreground">
+              Entre le code à 6 chiffres de ton application d'authentification
+            </p>
+            <input
+              type="text" inputMode="numeric" pattern="\d{6}" maxLength={6} required autoFocus
+              value={mfaCode} onChange={(e) => setMfaCode(e.target.value)}
+              placeholder="123456"
+              className="w-full rounded-2xl border border-border bg-input px-4 py-3 text-center text-lg tracking-[0.4em] focus:border-gold focus:outline-none"
+            />
+            <button type="submit" disabled={loading} className="w-full rounded-2xl bg-gradient-gold py-3 text-sm font-semibold text-gold-foreground disabled:opacity-50">
+              {loading ? "…" : "Vérifier"}
+            </button>
+            <button type="button" onClick={async () => { await supabase.auth.signOut(); setMfaFactorId(null); setMfaCode(""); }} className="w-full text-center text-xs text-muted-foreground">
+              Annuler
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={submit} className="w-full space-y-3">
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
+              className="w-full rounded-2xl border border-border bg-input px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+            <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe"
+              className="w-full rounded-2xl border border-border bg-input px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+            <button type="submit" disabled={loading} className="w-full rounded-2xl bg-gradient-gold py-3 text-sm font-semibold text-gold-foreground disabled:opacity-50">
+              {loading ? "…" : mode === "signin" ? "Se connecter" : "Créer mon compte"}
+            </button>
+          </form>
+        )}
 
         <div className="my-4 flex w-full items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
           <div className="h-px flex-1 bg-border" /> ou <div className="h-px flex-1 bg-border" />

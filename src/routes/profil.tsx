@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User as UserIcon, Mail, KeyRound, ChevronRight } from "lucide-react";
+import { LogOut, User as UserIcon, Mail, KeyRound, ChevronRight, ShieldCheck, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/profil")({
   component: Profil,
@@ -17,6 +17,68 @@ function Profil() {
   const [pwd, setPwd] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // 2FA
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
+  const [secret, setSecret] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [pendingFactorId, setPendingFactorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.auth.mfa.listFactors().then(({ data }) => {
+      const totp = data?.totp?.find((f) => f.status === "verified");
+      setMfaEnabled(!!totp);
+      setMfaFactorId(totp?.id ?? null);
+    });
+  }, [user]);
+
+  const startEnroll = async () => {
+    setEnrolling(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+      if (error) throw error;
+      setQr(data.totp.qr_code);
+      setSecret(data.totp.secret);
+      setPendingFactorId(data.id);
+    } catch (e: any) {
+      toast.error(e.message ?? "Impossible d'activer la 2FA");
+      setEnrolling(false);
+    }
+  };
+
+  const verifyEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingFactorId) return;
+    try {
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+      if (ce) throw ce;
+      const { error: ve } = await supabase.auth.mfa.verify({
+        factorId: pendingFactorId, challengeId: ch.id, code: otpCode,
+      });
+      if (ve) throw ve;
+      toast.success("Double authentification activée");
+      setMfaEnabled(true);
+      setMfaFactorId(pendingFactorId);
+      setQr(null); setSecret(null); setOtpCode(""); setPendingFactorId(null); setEnrolling(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Code incorrect");
+    }
+  };
+
+  const disableMfa = async () => {
+    if (!mfaFactorId) return;
+    const ok = window.confirm("Désactiver la double authentification ?");
+    if (!ok) return;
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId });
+    if (error) { toast.error(error.message); return; }
+    setMfaEnabled(false);
+    setMfaFactorId(null);
+    toast.success("2FA désactivée");
+  };
 
   if (loading) return <MobileShell><div /></MobileShell>;
 
@@ -102,6 +164,57 @@ function Profil() {
             </button>
           </form>
         )}
+
+        {/* 2FA */}
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${mfaEnabled ? "bg-gold/10 text-gold" : "bg-secondary"}`}>
+              {mfaEnabled ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Double authentification (2FA)</p>
+              <p className="text-[11px] text-muted-foreground">
+                {mfaEnabled ? "Activée — code requis à la connexion" : "Renforce la sécurité de ton compte"}
+              </p>
+            </div>
+            {mfaEnabled ? (
+              <button onClick={disableMfa} className="rounded-xl border border-border px-3 py-1.5 text-xs text-destructive">Désactiver</button>
+            ) : !enrolling ? (
+              <button onClick={startEnroll} className="rounded-xl bg-gradient-gold px-3 py-1.5 text-xs font-medium text-gold-foreground">Activer</button>
+            ) : null}
+          </div>
+
+          {enrolling && qr && (
+            <form onSubmit={verifyEnroll} className="mt-4 space-y-3 border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground">
+                1. Scanne ce QR code avec une app d'authentification (Google Authenticator, Authy…).
+              </p>
+              <div className="flex justify-center rounded-xl bg-white p-3">
+                <img src={qr} alt="QR code 2FA" className="h-44 w-44" />
+              </div>
+              {secret && (
+                <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ou clé : <span className="select-all font-mono text-foreground">{secret}</span>
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">2. Entre le code à 6 chiffres généré :</p>
+              <input
+                type="text" inputMode="numeric" pattern="\d{6}" maxLength={6} required
+                value={otpCode} onChange={(e) => setOtpCode(e.target.value)}
+                placeholder="123456"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-center text-lg tracking-[0.4em] focus:border-gold focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={() => { setEnrolling(false); setQr(null); setSecret(null); setPendingFactorId(null); }} className="flex-1 rounded-xl border border-border py-2 text-sm">
+                  Annuler
+                </button>
+                <button type="submit" className="flex-1 rounded-xl bg-gradient-gold py-2 text-sm font-medium text-gold-foreground">
+                  Vérifier
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
 
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
