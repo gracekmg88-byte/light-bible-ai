@@ -165,6 +165,57 @@ function Profil() {
           </form>
         )}
 
+        {/* 2FA */}
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${mfaEnabled ? "bg-gold/10 text-gold" : "bg-secondary"}`}>
+              {mfaEnabled ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Double authentification (2FA)</p>
+              <p className="text-[11px] text-muted-foreground">
+                {mfaEnabled ? "Activée — code requis à la connexion" : "Renforce la sécurité de ton compte"}
+              </p>
+            </div>
+            {mfaEnabled ? (
+              <button onClick={disableMfa} className="rounded-xl border border-border px-3 py-1.5 text-xs text-destructive">Désactiver</button>
+            ) : !enrolling ? (
+              <button onClick={startEnroll} className="rounded-xl bg-gradient-gold px-3 py-1.5 text-xs font-medium text-gold-foreground">Activer</button>
+            ) : null}
+          </div>
+
+          {enrolling && qr && (
+            <form onSubmit={verifyEnroll} className="mt-4 space-y-3 border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground">
+                1. Scanne ce QR code avec une app d'authentification (Google Authenticator, Authy…).
+              </p>
+              <div className="flex justify-center rounded-xl bg-white p-3">
+                <img src={qr} alt="QR code 2FA" className="h-44 w-44" />
+              </div>
+              {secret && (
+                <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ou clé : <span className="select-all font-mono text-foreground">{secret}</span>
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">2. Entre le code à 6 chiffres généré :</p>
+              <input
+                type="text" inputMode="numeric" pattern="\d{6}" maxLength={6} required
+                value={otpCode} onChange={(e) => setOtpCode(e.target.value)}
+                placeholder="123456"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-center text-lg tracking-[0.4em] focus:border-gold focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={() => { setEnrolling(false); setQr(null); setSecret(null); setPendingFactorId(null); }} className="flex-1 rounded-xl border border-border py-2 text-sm">
+                  Annuler
+                </button>
+                <button type="submit" className="flex-1 rounded-xl bg-gradient-gold py-2 text-sm font-medium text-gold-foreground">
+                  Vérifier
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3 text-sm text-destructive hover:bg-destructive/10"
