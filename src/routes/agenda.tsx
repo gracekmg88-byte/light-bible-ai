@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { toast } from "sonner";
 import { Plus, Trash2, NotebookPen, Save, Check, Loader2, FileText, FileDown } from "lucide-react";
 import { jsPDF } from "jspdf";
@@ -34,7 +34,7 @@ const entrySchema = z.object({
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 function AgendaPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [editing, setEditing] = useState<Entry | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
-import { useAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Trash2 } from "lucide-react";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/favoris")({
 type Fav = { id: string; book_id: number; book_name: string; chapter: number; verse: number; text: string };
 
 function Favoris() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useRequireAuth();
   const [favs, setFavs] = useState<Fav[]>([]);
 
   useEffect(() => {
