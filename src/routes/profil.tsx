@@ -71,7 +71,6 @@ function Profil() {
 
   const disableMfa = async () => {
     if (!mfaFactorId) return;
-    if (!confirm) {/* unused, just to silence */}
     const ok = window.confirm("Désactiver la double authentification ?");
     if (!ok) return;
     const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId });
