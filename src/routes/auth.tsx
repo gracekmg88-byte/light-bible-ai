@@ -55,6 +55,16 @@ function AuthPage() {
           }
           return;
         }
+        // Vérifie si 2FA est requis
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+          const { data: factors } = await supabase.auth.mfa.listFactors();
+          const totp = factors?.totp?.find((f) => f.status === "verified");
+          if (totp) {
+            setMfaFactorId(totp.id);
+            return;
+          }
+        }
         navigate({ to: "/" });
       }
     } catch (err: any) {
@@ -72,6 +82,24 @@ function AuthPage() {
       navigate({ to: "/" });
     } catch {
       toast.error("Connexion Google indisponible");
+    }
+  };
+
+  const verifyMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaFactorId) return;
+    setLoading(true);
+    try {
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+      if (ce) throw ce;
+      const { error: ve } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: ch.id, code: mfaCode });
+      if (ve) throw ve;
+      toast.success("Authentification réussie");
+      navigate({ to: "/" });
+    } catch (err: any) {
+      toast.error(err.message ?? "Code incorrect");
+    } finally {
+      setLoading(false);
     }
   };
 
