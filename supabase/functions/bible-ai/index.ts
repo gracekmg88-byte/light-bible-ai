@@ -54,7 +54,7 @@ serve(async (req) => {
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages }),
+      body: JSON.stringify({ model: "openai/gpt-5", messages }),
     });
 
     if (!r.ok) {
