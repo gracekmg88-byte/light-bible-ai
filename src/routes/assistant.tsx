@@ -55,7 +55,7 @@ function Assistant() {
     <MobileShell>
       <PageHeader title="Assistant" subtitle="Une lumière dans la Parole" />
 
-      <div ref={scrollRef} className="px-5 pt-4">
+      <div ref={scrollRef} className="px-5 pt-4 pb-44 overflow-y-auto max-h-[calc(100vh-180px)]">
         {messages.length === 0 ? (
           <div className="py-6">
             <div className="mb-6 flex flex-col items-center text-center">
