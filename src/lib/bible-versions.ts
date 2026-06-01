@@ -3,7 +3,7 @@ export type BibleVersion = {
   id: string;
   name: string;
   short: string;
-  lang: "fr" | "en";
+  lang: "fr" | "en" | "sw";
 };
 
 export const BIBLE_VERSIONS: BibleVersion[] = [
