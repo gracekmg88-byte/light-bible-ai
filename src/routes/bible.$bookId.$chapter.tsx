@@ -164,7 +164,7 @@ function ChapterPage() {
         }
       />
 
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-5 pt-6 pb-4 touch-pan-y" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {loading ? (
           <div className="space-y-3">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-5 animate-pulse rounded bg-muted" />)}</div>
         ) : (
