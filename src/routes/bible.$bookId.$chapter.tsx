@@ -63,6 +63,25 @@ function ChapterPage() {
   const prev = ch > 1 ? ch - 1 : null;
   const next = ch < book.chapters ? ch + 1 : null;
 
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < 0 && next) {
+      navigate({ to: "/bible/$bookId/$chapter", params: { bookId, chapter: String(next) } });
+    } else if (dx > 0 && prev) {
+      navigate({ to: "/bible/$bookId/$chapter", params: { bookId, chapter: String(prev) } });
+    }
+  };
+
   const toggleFav = async (v: Verse) => {
     if (!user) {
       toast.info("Connecte-toi pour sauvegarder");
@@ -145,7 +164,7 @@ function ChapterPage() {
         }
       />
 
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-5 pt-6 pb-4 touch-pan-y" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {loading ? (
           <div className="space-y-3">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-5 animate-pulse rounded bg-muted" />)}</div>
         ) : (
@@ -233,7 +252,7 @@ function ChapterPage() {
                   >
                     <div>
                       <p className="text-sm font-medium">{v.name}</p>
-                      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{v.lang === "fr" ? "Français" : "English"} · {v.short}</p>
+                      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{v.lang === "fr" ? "Français" : v.lang === "sw" ? "Kiswahili" : "English"} · {v.short}</p>
                     </div>
                     {version === v.id && <span className="text-[10px] font-bold text-gold">ACTIF</span>}
                   </button>

@@ -3,7 +3,7 @@ export type BibleVersion = {
   id: string;
   name: string;
   short: string;
-  lang: "fr" | "en";
+  lang: "fr" | "en" | "sw";
 };
 
 export const BIBLE_VERSIONS: BibleVersion[] = [
@@ -12,6 +12,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
   { id: "BDS",     name: "Bible du Semeur",           short: "BDS",  lang: "fr" },
   { id: "FRPDV17", name: "Parole de Vie 2017",        short: "PDV",  lang: "fr" },
   { id: "FRDBY",   name: "Darby (français)",          short: "DBY",  lang: "fr" },
+  { id: "SUV",     name: "Swahili Union Version",     short: "SUV",  lang: "sw" },
   { id: "KJV",     name: "King James Version",        short: "KJV",  lang: "en" },
   { id: "NIV",     name: "New International Ver.",    short: "NIV",  lang: "en" },
   { id: "ESV",     name: "English Standard Ver.",     short: "ESV",  lang: "en" },
