@@ -233,7 +233,7 @@ function ChapterPage() {
                   >
                     <div>
                       <p className="text-sm font-medium">{v.name}</p>
-                      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{v.lang === "fr" ? "Français" : "English"} · {v.short}</p>
+                      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{v.lang === "fr" ? "Français" : v.lang === "sw" ? "Kiswahili" : "English"} · {v.short}</p>
                     </div>
                     {version === v.id && <span className="text-[10px] font-bold text-gold">ACTIF</span>}
                   </button>
