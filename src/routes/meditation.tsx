@@ -22,6 +22,7 @@ function MeditationPage() {
   const { current, playing, loading, volume, play, toggle, setVolume } = useGlobalAudio();
   const [focus, setFocus] = useState(false);
   const [customs, setCustoms] = useState<Instrumental[]>([]);
+  const [customsLoaded, setCustomsLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -29,12 +30,12 @@ function MeditationPage() {
         .from("custom_instrumentals")
         .select("id,title,mood,storage_path")
         .order("created_at", { ascending: false });
-      if (!data) return;
-      const list = data.map((d) => {
+      const list = (data ?? []).map((d) => {
         const { data: pub } = supabase.storage.from("instrumentals").getPublicUrl(d.storage_path);
         return { id: d.id, title: d.title, mood: d.mood || "Importé", url: pub.publicUrl };
       });
       setCustoms(list);
+      setCustomsLoaded(true);
     })();
   }, []);
 
@@ -45,7 +46,18 @@ function MeditationPage() {
     else play(i);
   };
 
-  if (authLoading || !user) return <MobileShell><div /></MobileShell>;
+  if (authLoading || !user) {
+    return (
+      <MobileShell>
+        <PageHeader title="Méditation" subtitle="Prière & contemplation" />
+        <div className="px-5 pt-6 space-y-3">
+          <div className="h-24 animate-pulse rounded-3xl bg-card/60" />
+          <div className="h-16 animate-pulse rounded-2xl bg-card/40" />
+          <div className="h-16 animate-pulse rounded-2xl bg-card/40" />
+        </div>
+      </MobileShell>
+    );
+  }
 
   return (
     <MobileShell>
@@ -60,7 +72,12 @@ function MeditationPage() {
           </p>
         </div>
 
-        {all.length === 0 ? (
+        {!customsLoaded ? (
+          <div className="mt-4 space-y-2">
+            <div className="h-16 animate-pulse rounded-2xl bg-card/40" />
+            <div className="h-16 animate-pulse rounded-2xl bg-card/40" />
+          </div>
+        ) : all.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">
             <p className="text-sm text-muted-foreground">
               Aucune instrumentale disponible pour le moment. Un administrateur peut en importer depuis le tableau de bord.

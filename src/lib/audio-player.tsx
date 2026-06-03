@@ -28,6 +28,7 @@ export function GlobalAudioProvider({ children }: { children: ReactNode }) {
       const a = document.createElement("audio");
       a.loop = true;
       a.preload = "auto";
+      (a as any).playsInline = true;
       audioRef.current = a;
     }
     const a = audioRef.current;
@@ -54,6 +55,22 @@ export function GlobalAudioProvider({ children }: { children: ReactNode }) {
       a.removeEventListener("error", onError);
     };
   }, [volume]);
+
+  // Media Session API → contrôles lock-screen / notifications.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    if (!current) { navigator.mediaSession.metadata = null; return; }
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: current.title,
+      artist: "Bible Lumière",
+      album: current.mood,
+    });
+    try {
+      navigator.mediaSession.setActionHandler("play", () => audioRef.current?.play().catch(() => {}));
+      navigator.mediaSession.setActionHandler("pause", () => audioRef.current?.pause());
+      navigator.mediaSession.setActionHandler("stop", () => stop());
+    } catch { /* certains navigateurs ne supportent pas tous les handlers */ }
+  }, [current]);
 
   const play = (i: Instrumental) => {
     const a = audioRef.current;

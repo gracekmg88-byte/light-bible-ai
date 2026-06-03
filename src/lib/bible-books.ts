@@ -80,12 +80,46 @@ export const getBook = (id: number) => BIBLE_BOOKS.find((b) => b.id === id);
 
 export type Verse = { pk: number; verse: number; text: string };
 
-// Bolls.life public API. Plusieurs versions supportées.
+// Cache local des chapitres (offline-first).
+const CACHE_PREFIX = "bible.chapter.";
+function cacheKey(bookId: number, chapter: number, version: string) {
+  return `${CACHE_PREFIX}${version}.${bookId}.${chapter}`;
+}
+function readCache(bookId: number, chapter: number, version: string): Verse[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(cacheKey(bookId, chapter, version));
+    return raw ? (JSON.parse(raw) as Verse[]) : null;
+  } catch { return null; }
+}
+function writeCache(bookId: number, chapter: number, version: string, verses: Verse[]) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(cacheKey(bookId, chapter, version), JSON.stringify(verses)); }
+  catch { /* quota plein, ignorer */ }
+}
+
+// Bolls.life public API + cache offline.
 export async function fetchChapter(bookId: number, chapter: number, version: string = "FRLSG"): Promise<Verse[]> {
-  const res = await fetch(`https://bolls.life/get-text/${version}/${bookId}/${chapter}/`);
-  if (!res.ok) throw new Error("Erreur de chargement du chapitre");
-  const data = (await res.json()) as Array<{ pk: number; verse: number; text: string }>;
-  return data.map((v) => ({ ...v, text: v.text.replace(/<[^>]+>/g, "").trim() }));
+  try {
+    const res = await fetch(`https://bolls.life/get-text/${version}/${bookId}/${chapter}/`);
+    if (!res.ok) throw new Error("Erreur de chargement du chapitre");
+    const data = (await res.json()) as Array<{ pk: number; verse: number; text: string }>;
+    const verses = data.map((v) => ({ ...v, text: v.text.replace(/<[^>]+>/g, "").trim() }));
+    writeCache(bookId, chapter, version, verses);
+    return verses;
+  } catch (err) {
+    const cached = readCache(bookId, chapter, version);
+    if (cached) return cached;
+    throw err;
+  }
+}
+
+// Récupère un verset précis dans une version (pour la comparaison).
+export async function fetchVerse(bookId: number, chapter: number, verse: number, version: string): Promise<string | null> {
+  try {
+    const verses = await fetchChapter(bookId, chapter, version);
+    return verses.find((v) => v.verse === verse)?.text ?? null;
+  } catch { return null; }
 }
 
 // Verset du jour stable (basé sur la date)
