@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:capacitor": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "cap:sync": "npm run build:capacitor && npx cap sync android",
+    "cap:open": "npx cap open android",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
