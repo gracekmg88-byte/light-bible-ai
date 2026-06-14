@@ -9,6 +9,7 @@
     "build:capacitor": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "cap:add:android": "npx cap add android",
     "cap:sync": "npm run build:capacitor && npx cap sync android",
     "cap:open": "npx cap open android",
     "lint": "eslint .",
