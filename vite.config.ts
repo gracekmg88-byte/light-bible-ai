@@ -19,10 +19,8 @@ export default defineConfig({
     },
   },
   vite: {
-    base: "./",
     build: {
       sourcemap: false,
-      assetsDir: "assets",
     },
   },
 });
