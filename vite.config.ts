@@ -6,22 +6,4 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig({
-  nitro: false,
-  tanstackStart: {
-    spa: {
-      enabled: true,
-      prerender: {
-        outputPath: "/index",
-      },
-    },
-    prerender: {
-      enabled: false,
-    },
-  },
-  vite: {
-    build: {
-      sourcemap: false,
-    },
-  },
-});
+export default defineConfig({});
