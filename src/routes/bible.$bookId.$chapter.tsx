@@ -212,6 +212,8 @@ function ChapterPage() {
         subtitle={book.testament === "AT" ? "Ancien Testament" : "Nouveau Testament"}
         right={
           <div className="flex items-center gap-1">
+            <Link to="/bible" className="rounded-lg border border-border p-2 text-foreground" aria-label="Tous les livres"><BookOpen className="h-4 w-4" /></Link>
+            <Link to="/bible/$bookId" params={{ bookId }} className="rounded-lg border border-border px-2 py-1.5 text-[10px] font-bold tracking-wider text-foreground" aria-label="Chapitres du livre">CH.</Link>
             <button onClick={() => setShowVersions(true)} className="rounded-lg border border-border px-2 py-1.5 text-[10px] font-bold tracking-wider text-gold" aria-label="Changer de version">
               {BIBLE_VERSIONS.find((v) => v.id === version)?.short ?? "LSG"}
             </button>

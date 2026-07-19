@@ -49,8 +49,8 @@ function Section({ title, books }: { title: string; books: typeof BIBLE_BOOKS })
         {books.map((b) => (
           <li key={b.id}>
             <Link
-              to="/bible/$bookId/$chapter"
-              params={{ bookId: String(b.id), chapter: "1" }}
+              to="/bible/$bookId"
+              params={{ bookId: String(b.id) }}
               className="block rounded-xl border border-border bg-card px-3 py-3 transition-colors hover:border-gold/50"
             >
               <p className="font-display text-sm text-foreground">{b.name}</p>
